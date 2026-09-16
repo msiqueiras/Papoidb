@@ -20,3 +20,5 @@ A construção será baseada na linguagem Python e irá conter um arquivo NOTES.
 
 * João Vitor Martins Ferreira Maia - 202511140030
 * Maria Luiza Rodrigues Siqueira - 202511140013
+
+![Imagem de um personagem amarelo com o título "papoi" (minion)](images/papoi.jpg)
