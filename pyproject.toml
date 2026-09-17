@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "papoidb"
+version = "0.1.0"
+description = "Projeto da disciplina de Banco de Dados II"
+authors = ["msiqueiras <devef.msiqueira@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+ipykernel = "^7.3.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

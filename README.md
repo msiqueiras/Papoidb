@@ -16,6 +16,31 @@ O projeto está sendo desenvolvido em módulos ordenados, de 1 ao 7, contendo um
 
 A construção será baseada na linguagem Python e irá conter um arquivo NOTES.md para as decisões de cada módulo.
 
+## Estrutura dos arquivos
+
+```text
+.
+├── .gitignore
+├── NOTES.md
+├── poetry.lock
+├── pyproject.toml
+├── README.md
+|
+├── images/
+│   └── papoi.jpg
+|
+├── src/
+│   ├── FileManager.py
+|   ├── Page.py
+│   └── ...
+|
+└── tests/
+    ├── m1_testes.ipynb
+    ├── Papoidb.bin
+    └── ...
+
+```
+
 ### Discentes
 
 * João Vitor Martins Ferreira Maia - 202511140030
