@@ -7,7 +7,11 @@ class Page:
         Insere registro dos dados no slot solicitado. Verifica se o slot está disponível.
 
         Args:
+            slot (int): a numeração do slot onde se deseja inserir o registro
+            record (bytes): o registro em si
 
+        Returns:
+            None
 
         """
 
