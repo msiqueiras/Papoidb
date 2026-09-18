@@ -29,12 +29,15 @@ class FileManager:
                 if not content: #se o arquivo estiver vazio
                     return bytearray(4096)
 
-                elif len(content) < 4096:
-                    full_page = bytearray(4096)
-                    full_page[: len(content)] = content
+                elif len(content) < 4096: # se o conteudo do arquivo for menor que 4096Kbytes, o bytes restantes sao preenchidos com 0
+                    full_page = bytearray(4096) # cria pagina com bytes zerados
+                    full_page[: len(content)] = content # completa a pagina com os bytes lidos
 
-                    return bytearray(full_page) 
-                
+                    return bytearray(full_page)
+                 
+                else: # quando len(content) == 4096
+                     return bytearray(content) 
+
         except PermissionError:
             print("Permissão para acesso do arquivo negada.")
 
