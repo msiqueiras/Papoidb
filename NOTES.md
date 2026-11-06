@@ -37,3 +37,4 @@ Caso (2): Registro menor do que 8 B. O registro concatena os bytes inseridos mai
 
 Puxa o registro da memória.
 
+# Módulo 2
