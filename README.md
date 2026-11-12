@@ -48,7 +48,7 @@ A construção é baseada na linguagem **Python**, utilizando a biblioteca `stru
 ## Etapa de implementação
 
 - [x] M1
-- [ ] M2
+- [x] M2
 - [ ] M3
 - [ ] M4
 
