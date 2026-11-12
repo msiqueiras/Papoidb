@@ -37,4 +37,27 @@ Caso (2): Registro menor do que 8 B. O registro concatena os bytes inseridos mai
 
 Puxa o registro da memória.
 
+---
+
 # Módulo 2
+
+## Conceitos importantes
+
+- Hit e Miss: quando a cpu for procurar algo na cache, ele irá verificar se aquela página possui um frame correspondente ou não. Caso encontre o frame na cache, diz-se ser um HIT (acerto). Caso não encontre, ocorre o MISS (falha) e o processador terá que pedir para a memória secundária essa página.
+- LRU: last recently use é um algoritmo de gerência de memória qu elemento mais antigo a ser utilizado é descartado
+- Pin: quando aquele frame está sendo utilizado, a característica `pin_count` sai de zero para dizer ao processador que ela está sendo usada em algum lugar e que não pode ser retirada da cache naquele momento
+- Dirty Bit: quando uma página está na cache, na verdade, quem está é uma cópia dela, isso é, o frame daquela página. Quando se faz alguma alteração nele, ele é dito como sujo (dirty), pois está diferente da página que foi clonada. Para que o frame retorne para a memória secundária, é preciso regravá-lo antes de retirá-lo da cache
+
+## Decisões do M2
+
+### Classe Frame
+
+É uma classe para representar justamente o elemento que é uma cópia exata de uma página dentro da cache, possuindo informações sobre os seus pins e se está ou não limpo
+
+### Classe BufferPool
+
+É a construção mais importante do M2, pois nela há os conceitos de pool, que é a quantidade de páginas/frames suportados na cache, a tabela de páginas que está dentro da cache, a ordenação de quem foi utilizado para uso e o método de busca de uma página dentro da cache
+
+## Decisão mais importante:
+
+Implementar a lógica de exceção para o caso de o cache estar cheio de páginas pinadas . Foi necessário criar uma *flag booleana* (`kicked_out`) para controlar o fluxo. O objetivo era garantir que o loop percorresse toda a lista LRU em busca de uma "vítima". Se o loop terminasse sem que nenhuma página tivesse sido expulsa, a flag permaneceria `False` e a exceção `FullCacheError` seria lançada. Essa abordagem foi escolhida em vez de contar iterações, pois é mais segura caso a página expulsa esteja no meio da lista (quando o loop é interrompido com `break`).
