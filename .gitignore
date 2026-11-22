@@ -208,5 +208,6 @@ pyrightconfig.json
 .ionide
 
 *.bin
+.agent-cache
 
 # End of https://www.toptal.com/developers/gitignore/api/linux,visualstudiocode,python
