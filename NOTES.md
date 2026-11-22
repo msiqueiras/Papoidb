@@ -58,6 +58,18 @@ Puxa o registro da memória.
 
 É a construção mais importante do M2, pois nela há os conceitos de pool, que é a quantidade de páginas/frames suportados na cache, a tabela de páginas que está dentro da cache, a ordenação de quem foi utilizado para uso e o método de busca de uma página dentro da cache
 
-## Decisão mais importante:
+## Decisão mais importante
 
 Implementar a lógica de exceção para o caso de o cache estar cheio de páginas pinadas . Foi necessário criar uma *flag booleana* (`kicked_out`) para controlar o fluxo. O objetivo era garantir que o loop percorresse toda a lista LRU em busca de uma "vítima". Se o loop terminasse sem que nenhuma página tivesse sido expulsa, a flag permaneceria `False` e a exceção `FullCacheError` seria lançada. Essa abordagem foi escolhida em vez de contar iterações, pois é mais segura caso a página expulsa esteja no meio da lista (quando o loop é interrompido com `break`).
+
+---
+
+# Módulo 3
+
+## Classe Node
+
+É a classe do nó da árvore B+. É nela em que sabemos o cabeçalho geral daquele nó, se ele é nó folha, quantas chaves aquele nó possui, o ponteiro para a próxima chave e as chaves em si.
+
+## Classe BplusTree
+
+É a classe de gerenciamento de nós. É onde podemos buscar e inserir novas chaves.
