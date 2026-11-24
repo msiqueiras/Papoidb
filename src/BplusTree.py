@@ -1,4 +1,3 @@
-
 class Node:
     OFFSET_IS_LEAF = 0
     OFFSET_NUM_KEYS = 1
@@ -36,6 +35,21 @@ class Node:
         offset = self.OFFSET_KEYS_START + (index * 8) + 4
         self.data[offset : offset + 4] = value.to_bytes(4, byteorder='big')
 
+    def getChildPointer(self, index: int) -> int:
+        if index == 0:
+            return int.from_bytes(self.data[self.OFFSET_NEXT_LEAF : self.OFFSET_NEXT_LEAF + 4], byteorder='big')
+        offset = self.OFFSET_KEYS_START + (index * 8) - 4
+        return int.from_bytes(self.data[offset : offset + 4], byteorder='big')
+
+    def setChildPointer(self, index: int, value: int) -> None:
+        if index == 0:
+            self.data[self.OFFSET_NEXT_LEAF : self.OFFSET_NEXT_LEAF + 4] = value.to_bytes(4, byteorder='big')
+        else:
+            offset = self.OFFSET_KEYS_START + (index * 8) - 4
+            self.data[offset : offset + 4] = value.to_bytes(4, byteorder='big')
+
+
+        
 class BplusTree:
     def __init__(self, root: Node, order: int = 341):
         self.root = root
