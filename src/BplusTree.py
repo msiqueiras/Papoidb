@@ -51,8 +51,17 @@ class Node:
 
         
 class BplusTree:
-    def __init__(self, root: Node, order: int = 341):
-        self.root = root
+    def __init__(self, order: int = 341):
+        page = bytearray(4096)
+        self.root = Node(page)
+        self.root.setIsLeaf()
+        self.root.setNumKeys(0)
         self.order = order
 
-    
+    def search(self, key: int) -> int | None:
+        if self.root.isLeaf():
+            for i in range(self.root.getNumKeys()):
+                if key == self.root.getKey(i):
+                    return self.root.getPointer(i)
+            return None        
+                
