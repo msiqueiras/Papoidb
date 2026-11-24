@@ -58,6 +58,37 @@ Puxa o registro da memória.
 
 É a construção mais importante do M2, pois nela há os conceitos de pool, que é a quantidade de páginas/frames suportados na cache, a tabela de páginas que está dentro da cache, a ordenação de quem foi utilizado para uso e o método de busca de uma página dentro da cache
 
-## Decisão mais importante:
+## Decisão mais importante
 
 Implementar a lógica de exceção para o caso de o cache estar cheio de páginas pinadas . Foi necessário criar uma *flag booleana* (`kicked_out`) para controlar o fluxo. O objetivo era garantir que o loop percorresse toda a lista LRU em busca de uma "vítima". Se o loop terminasse sem que nenhuma página tivesse sido expulsa, a flag permaneceria `False` e a exceção `FullCacheError` seria lançada. Essa abordagem foi escolhida em vez de contar iterações, pois é mais segura caso a página expulsa esteja no meio da lista (quando o loop é interrompido com `break`).
+
+---
+
+# Módulo 3
+
+## Conceitos importantes
+
+- A árvore B+ é uma variação da árvore B, onde todos os nós folhas estão no mesmo nível. Além disso, há ponteiros na profundidade das folhas que permitem que esse nível seja lido de forma sequencial ordenamente crescente
+- As chaves nós folhas apontam diretamente para o registro no disco de seus valores
+- Os nós internos são guias para navegação para inserções, buscas e remoções
+- Uma árvore B+ possui ordem `m`, que é a quantidade máxima de filhos que um nó interno não-raiz pode ter
+- Cada nó interno possui no máximo `m-1` chaves
+- Ao gerar overflow na inserção de chaves, pegamos a chave ao meio para criarmos mais um nó ou inseri-la em outro nó, seja ele no mesmo nível, seja ele no nível a cima
+
+### Classe Node
+
+É a classe do nó da árvore B+. É nela em que sabemos o cabeçalho geral daquele nó, se ele é nó folha, quantas chaves aquele nó possui, o ponteiro para a próxima chave e as chaves em si. Os offsets definidos no ínicio são parte do cabeçalho da página/nó definindo onde cada informação pode ser encontrada na página.
+
+- Observação 1: O cálculo da chave+ponteiro é feita com base no pulo do cabeçalho:  
+  - Chave: ponto de partida (byte 7) + (índice em que está a chave)*8. Esse 8 são os bytes da chave+ponteiro (4 bytes cada)
+  - Ponteiro: mesma fórmula com um +4 significa apenas que o ponteiro começa 4 bytes depois de onde está a sua chave
+
+### Classe BplusTree
+
+É a classe de gerenciamento de nós. É onde podemos buscar e inserir novas chaves. Importante mencionar que a **REMOÇÃO** de nós **NÃO** foi implementada nesse escopo por falta de tempo.
+
+## Decisão mais importante
+
+Arquiterualmente, a decisão que mais impactou na construção do módulo foi o encapsulamento da classe Node, já que em algumas implementações da internet, vimos que a estrutura do nó era criada dentro da classe da árvore diretamente, o que não fazia sentido para nós por estarmos manipulando bytes.
+Além disso, pelo tempo, no código atual, caso a folha encha, é lançado um `OverflowError`, assim não existindo o *split* de nós nesse momento. Para testes, a inserção de até `order-1` é seguro.
+

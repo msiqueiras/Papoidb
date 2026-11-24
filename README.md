@@ -15,12 +15,12 @@ O projeto está sendo desenvolvido em módulos ordenados, contendo um tema cada 
 * M3: Árvore B+, busca e inserção
 * M4: Parser e catálogo
 
-### Trabalho Final (Parte 2):
+### Trabalho Final (Parte 2)
 Tópico 1 - Executor e filtro: Implementação de `WHERE` simples no executor.
 
 A construção é baseada na linguagem **Python**, utilizando a biblioteca `struct`/`bytearray` para manipulação binária e `poetry` para gerenciamento de dependências. O repositório contém um arquivo `NOTES.md` documentando as decisões de projeto e trade-offs de cada módulo.
 
-## Estrura do projeto: 
+## Estrura do projeto
 
 ```
 .
@@ -39,7 +39,10 @@ A construção é baseada na linguagem **Python**, utilizando a biblioteca `stru
 │   ├── BufferPool.py
 │   └── ...
 |
-└── tests/
+├── playground/ #onde testes de funcionalidade e de entendimento são feitos
+|   └── m3.ipynb
+|
+└── tests/ #onde testes de aceitação e de integração são feitos
     ├── m1_testes.ipynb
     ├── m2_testes.ipynb
     └── ...
@@ -49,8 +52,9 @@ A construção é baseada na linguagem **Python**, utilizando a biblioteca `stru
 
 - [x] M1
 - [x] M2
-- [ ] M3
+- [x] M3
 - [ ] M4
+- [ ] Tópico 1
 
 ## Discentes
 
