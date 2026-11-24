@@ -90,3 +90,5 @@ Implementar a lógica de exceção para o caso de o cache estar cheio de página
 ## Decisão mais importante
 
 Arquiterualmente, a decisão que mais impactou na construção do módulo foi o encapsulamento da classe Node, já que em algumas implementações da internet, vimos que a estrutura do nó era criada dentro da classe da árvore diretamente, o que não fazia sentido para nós por estarmos manipulando bytes.
+Além disso, pelo tempo, no código atual, caso a folha encha, é lançado um `OverflowError`, assim não existindo o *split* de nós nesse momento. Para testes, a inserção de até `order-1` é seguro.
+
