@@ -85,7 +85,6 @@ class BplusTree:
         self.next_node_id += 1
         return node_id
 
-
     def insert(self, key: int, ptr: int):
         node = self.root
         node_id = 0
