@@ -1,71 +1,59 @@
 RESERVED_KEYWORDS = ["CREATE", "SELECT", "FROM", "INT", "CHAR", "INSERT", "INTO", "VALUES", "WHERE", "AND", "OR"]
-CUSTOM_SYMBOLS = ["(", ")", "*", ","]
+CUSTOM_SYMBOLS = ["(", ")", "*", ",", ";", "=", ">", "<"]
+TOKENS_TYPES = ["KEYWORD", "NUMBER", "IDENTIFIER", "STRING", "SYMBOL", "EOF"]
 
 class Tokenizer:
     def __init__(self):
         self.keywords = RESERVED_KEYWORDS
         self.symbols = CUSTOM_SYMBOLS
+        self.tokens_types = TOKENS_TYPES
 
     def tokenize(self, sql_text: str) -> list:
         tokens = []
-        
-        word = ""         # Acumula letras para formar palavras/nomes
-        number_str = ""   # Acumula dígitos para formar números
-        in_string = False # Flag para saber se estamos dentro de aspas
-        
-        for index in range(len(sql_text)):
-            character = sql_text[index]
-            
-            if in_string:
-                if character == "'":
-                    in_string = False
-                    tokens.append(("STRING", word))
-                    word = ""
-                else:
-                    word += character
-                continue 
 
-            elif character == "'":
-                in_string = True
+        word = ""
+        digits = ""
+        index = 0
+
+        while index < len(sql_text):
+            character = sql_text[index]
+
+            if character in self.symbols:
+                tokens.append(("SYMBOL", character))
+                index += 1
+
+            elif character.isalpha() or character == "_":
+                while index < len(sql_text) and (sql_text[index].isalnum() or sql_text[index] == "_"):
+                    word += sql_text[index]
+                    index += 1
+
+                if word.upper() in self.keywords:
+                    tokens.append(("KEYWORD", word.upper()))
+                else:
+                    tokens.append(("IDENTIFIER", word))
+
                 word = ""
-                
-            elif character == " ":
-                if word != "":
-                    if word.upper() in self.keywords:
-                        tokens.append(("KEYWORD", word.upper()))
-                    else:
-                        tokens.append(("IDENTIFIER", word))
-                    word = ""
-                if number_str != "":
-                    tokens.append(("NUMBER", int(number_str)))
-                    number_str = ""
 
             elif character.isnumeric():
-                number_str += character
+                while index < len(sql_text) and sql_text[index].isnumeric():
+                    digits += sql_text[index]
+                    index += 1
 
-            
-            elif character in CUSTOM_SYMBOLS:
-                if word != "":
-                    if word.upper() in self.keywords:
-                        tokens.append(("KEYWORD", word.upper()))
-                    else:
-                        tokens.append(("IDENTIFIER", word))
-                    word = ""
-                if number_str != "":
-                    tokens.append(("NUMBER", int(number_str)))
-                    number_str = ""
-                tokens.append(("SYMBOL", character))
+                if index < len(sql_text) and (sql_text[index].isalpha() or sql_text[index] == "_"):
+                    while index < len(sql_text) and (sql_text[index].isalnum() or sql_text[index] == "_"):
+                        index += 1
+                        raise SyntaxError("IDENTIFICADOR INVÁLIDO COMEÇANDO COM NÚMERO.")
+                else:
+                    tokens.append(("NUMBER", int(digits)))
+
+                digits = ""
+
+            elif character.isspace():
+                index += 1
 
             else:
-                word += character
-
-        if word != "":
-            if word.upper() in self.keywords:
-                tokens.append(("KEYWORD", word.upper()))
-            else:
-                tokens.append(("IDENTIFIER", word))
-        if number_str != "":
-            tokens.append(("NUMBER", int(number_str)))
+                index += 1
 
         tokens.append(("EOF", None))
+
         return tokens
