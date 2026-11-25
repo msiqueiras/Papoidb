@@ -150,3 +150,14 @@ class BplusTree:
                 new_node.setKey(i, k)
                 new_node.setPointer(i, p)
             new_node.setNumKeys(len(right_entries))
+
+            # cria nova raiz com chave separadora e os ponteiros para as folhas
+            root_page = bytearray(4096)
+            new_root = Node(root_page)
+            new_root.setIsLeaf(False)
+            new_root.setKey(0, new_node.getKey(0))
+            new_root.setNumKeys(1)
+            self.nodes[2] = new_root
+            self.root = new_root
+            new_root.setChildPointer(0, 0)
+            new_root.setChildPointer(1, 1)
