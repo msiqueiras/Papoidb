@@ -108,4 +108,45 @@ class BplusTree:
             node.setNumKeys(node.getNumKeys() + 1)
             print(f"Chave {key} inserida com sucesso.")
         else:
-            raise OverflowError("A CHAVE NÃO FOI INSERIDA. FOLHA ALCANÇOU O LIMITE DE CHAVES.")
+            # raise OverflowError("A CHAVE NÃO FOI INSERIDA. FOLHA ALCANÇOU O LIMITE DE CHAVES.")
+            """Aqui sera implementado o split"""
+
+            # cria novo no
+            page = bytearray(4096)
+            new_node = Node(page)
+
+            # configura novo no
+            new_node.setIsLeaf(True)
+            new_node.setNumKeys(0)
+            self.nodes[1] = new_node # depois precsaremos definir um ID para cada no
+
+            # faz a folha antiga apontar para a nova, preservando o ponteiro que ela tinha
+            old_node_ptr = node.getChildPointer(0)
+            node.setChildPointer(0, 1)
+            new_node.setChildPointer(0, old_node_ptr)
+
+            # cria estrutura temporaria com o conteudo da folha original + a chave e ponteiro adicionados alem do limite da ordem 
+            overflow_node = []
+            for i in range(node.getNumKeys()):
+                overflow_node.append((node.getKey(i), node.getPointer(i)))
+            overflow_node.append((key, ptr))
+
+            # ordena a estrutura pelo valor da chave
+            overflow_node.sort(key=lambda item: item[0])
+
+            # divide a estrutura em duas partes
+            mid = len(overflow_node) // 2
+            left_entries = overflow_node[:mid]
+            right_entries = overflow_node[mid:]
+
+            # adiciona as chaves e ponteiros na folha antiga (esquerda)
+            for i, (k, p) in enumerate(left_entries):
+                node.setKey(i, k)
+                node.setPointer(i, p)
+            node.setNumKeys(len(left_entries))
+
+            # adiciona as chaves e ponteiros na folhas nova (direita)
+            for i, (k, p) in enumerate(right_entries):
+                new_node.setKey(i, k)
+                new_node.setPointer(i, p)
+            new_node.setNumKeys(len(right_entries))
