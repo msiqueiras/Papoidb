@@ -53,6 +53,7 @@ class BplusTree:
     def __init__(self, nodes: dict, order: int = 341):
         self.nodes = nodes
         self.order = order
+        self.next_node_id = 0
 
         page = bytearray(4096)
         self.root = Node(page)
@@ -60,6 +61,7 @@ class BplusTree:
         self.root.setNumKeys(0)
 
         self.nodes[0] = self.root
+        self.next_node_id = 1
 
     def search(self, key: int) -> int | None:
         node = self.root
@@ -78,8 +80,15 @@ class BplusTree:
         
         return None
 
+    def getNewNodeID(self):
+        node_id = self.next_node_id
+        self.next_node_id += 1
+        return node_id
+
+
     def insert(self, key: int, ptr: int):
         node = self.root
+        node_id = 0
 
         while not node.isLeaf():
             i = 0
@@ -87,7 +96,9 @@ class BplusTree:
                 i += 1
 
             child_id = node.getChildPointer(i)
+            node_id = child_id
             node = self.nodes[child_id]
+        old_node_id = node_id
 
         for k in range(node.getNumKeys()): #se há duplicatas
             if key == node.getKey(k):
@@ -118,11 +129,12 @@ class BplusTree:
             # configura novo no
             new_node.setIsLeaf(True)
             new_node.setNumKeys(0)
-            self.nodes[1] = new_node # depois precsaremos definir um ID para cada no
+            new_node_id = self.getNewNodeID()
+            self.nodes[new_node_id] = new_node
 
             # faz a folha antiga apontar para a nova, preservando o ponteiro que ela tinha
             old_node_ptr = node.getChildPointer(0)
-            node.setChildPointer(0, 1)
+            node.setChildPointer(0, new_node_id)
             new_node.setChildPointer(0, old_node_ptr)
 
             # cria estrutura temporaria com o conteudo da folha original + a chave e ponteiro adicionados alem do limite da ordem 
@@ -157,7 +169,9 @@ class BplusTree:
             new_root.setIsLeaf(False)
             new_root.setKey(0, new_node.getKey(0))
             new_root.setNumKeys(1)
-            self.nodes[2] = new_root
+            new_root.setChildPointer(0, old_node_id)
+            new_root.setChildPointer(1, new_node_id)
+
+            new_root_id = self.getNewNodeID()
+            self.nodes[new_root_id] = new_root
             self.root = new_root
-            new_root.setChildPointer(0, 0)
-            new_root.setChildPointer(1, 1)
