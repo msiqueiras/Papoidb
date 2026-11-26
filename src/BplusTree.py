@@ -1,4 +1,6 @@
 class Node:
+    NULL_POINTER = 0 # valor 0 fica reservado para indicar ausência de próxima folhas
+
     OFFSET_IS_LEAF = 0
     OFFSET_NUM_KEYS = 1
     OFFSET_NEXT_LEAF = 3
@@ -59,6 +61,7 @@ class BplusTree:
         self.root = Node(page)
         self.root.setIsLeaf(True)  
         self.root.setNumKeys(0)
+        self.root.setChildPointer(0, Node.NULL_POINTER)
 
         self.nodes[0] = self.root
         self.next_node_id = 1
@@ -130,9 +133,10 @@ class BplusTree:
             page = bytearray(4096)
             new_node = Node(page)
 
-            # configura novo no
+            # configura novo nó
             new_node.setIsLeaf(True)
             new_node.setNumKeys(0)
+            new_node.setChildPointer(0, Node.NULL_POINTER)
             new_node_id = self.getNewNodeID()
             self.nodes[new_node_id] = new_node
 
