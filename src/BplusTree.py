@@ -88,16 +88,25 @@ class BplusTree:
     def insert(self, key: int, ptr: int):
         node = self.root
         node_id = 0
+        parent = None # define nó pai, inicialmente None, pois o nó incial é raiz
+        parent_id = None
 
         while not node.isLeaf():
             i = 0
             while (i < node.getNumKeys()) and (key >= node.getKey(i)):
                 i += 1
 
+            parent = node # salva o nó pai
+            parent_id = node_id
+
             child_id = node.getChildPointer(i)
             node_id = child_id
             node = self.nodes[child_id]
+
         old_node_id = node_id
+
+        print(f"Pai: {parent_id}") # apenas para depuraçao
+        print(f"Nó encontrado: {old_node_id}")
 
         for k in range(node.getNumKeys()): #se há duplicatas
             if key == node.getKey(k):
@@ -118,8 +127,7 @@ class BplusTree:
             node.setNumKeys(node.getNumKeys() + 1)
             print(f"Chave {key} inserida com sucesso.")
         else:
-            # raise OverflowError("A CHAVE NÃO FOI INSERIDA. FOLHA ALCANÇOU O LIMITE DE CHAVES.")
-            """Aqui sera implementado o split"""
+            ### raise OverflowError("A CHAVE NÃO FOI INSERIDA. FOLHA ALCANÇOU O LIMITE DE CHAVES.")
 
             # cria novo no
             page = bytearray(4096)
@@ -174,3 +182,4 @@ class BplusTree:
             new_root_id = self.getNewNodeID()
             self.nodes[new_root_id] = new_root
             self.root = new_root
+            print(f"Chave {key} inserida com sucesso.")
