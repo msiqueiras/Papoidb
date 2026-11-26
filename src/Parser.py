@@ -3,7 +3,7 @@ class Parser:
         self.tokens = tokens
         self.position = 0
     
-    def _expected(self, token_type, token_value=None) -> str:
+    def _expected(self, token_type: str, token_value: str = None) -> str:
         current_token = self.tokens[self.position]
         
         if current_token[0] != token_type:
@@ -15,4 +15,16 @@ class Parser:
         self.position += 1
 
         return current_token[1]
-            
+
+    def _accepted(self, token_type: str, token_value: str = None) -> bool:
+        current_token = self.tokens[self.position]
+                
+        if current_token[0] != token_type:
+            return False
+
+        if token_value is not None and current_token[1] != token_value:
+            return False 
+        
+        self.position += 1
+
+        return True
