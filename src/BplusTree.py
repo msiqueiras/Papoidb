@@ -105,9 +105,6 @@ class BplusTree:
 
         old_node_id = node_id
 
-        print(f"Pai: {parent_id}") # apenas para depuraçao
-        print(f"Nó encontrado: {old_node_id}")
-
         for k in range(node.getNumKeys()): #se há duplicatas
             if key == node.getKey(k):
                 print(f"Chave {key} já existe na árvore.")
