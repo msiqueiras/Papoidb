@@ -42,7 +42,7 @@ class Tokenizer:
                 if index < len(sql_text) and (sql_text[index].isalpha() or sql_text[index] == "_"):
                     while index < len(sql_text) and (sql_text[index].isalnum() or sql_text[index] == "_"):
                         index += 1
-                        raise SyntaxError("IDENTIFICADOR INVÁLIDO COMEÇANDO COM NÚMERO.")
+                    raise SyntaxError("IDENTIFICADOR INVÁLIDO COMEÇANDO COM NÚMERO.")
                 else:
                     tokens.append(("NUMBER", int(digits)))
 
@@ -50,6 +50,19 @@ class Tokenizer:
 
             elif character.isspace():
                 index += 1
+
+            elif character in ["'", '"']:
+                index +=1
+                start_string = index
+                
+                while (index < len(sql_text)) and (sql_text[index] not in ["'", '"']):
+                    index +=1
+                
+                string_text = sql_text[start_string:index]
+                tokens.append(("STRING", string_text))
+
+                if index < len(sql_text) and (sql_text[index] in ["'", '"']):
+                    index+=1
 
             else:
                 index += 1
