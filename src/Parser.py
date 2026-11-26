@@ -28,3 +28,21 @@ class Parser:
         self.position += 1
 
         return True
+
+    def parse_column(self):
+
+        column_identifier = self._expected("IDENTIFIER")
+        column_type = self._expected("KEYWORD")
+        if column_type == "INT":
+            length = 4
+            column_infos = {"name": column_identifier, "type": column_type, "length": length}
+            return column_infos
+        
+        elif column_type == "CHAR":
+            parenteses = self._expected("SYMBOL", "(")
+            length = self._expected("NUMBER")
+            parenteses = self._expected("SYMBOL", ")")
+            column_infos = {"name": column_identifier, "type": column_type, "length": length}
+            return column_infos
+
+        raise SyntaxError(f"{column_type} NÃO É VÁLIDO PARA TABELAS. TENTE OS TIPOS INT OU CHAR.")
