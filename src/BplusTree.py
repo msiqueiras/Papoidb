@@ -170,16 +170,44 @@ class BplusTree:
                 new_node.setPointer(i, p)
             new_node.setNumKeys(len(right_entries))
 
-            # cria nova raiz com chave separadora e os ponteiros para as folhas
-            root_page = bytearray(4096)
-            new_root = Node(root_page)
-            new_root.setIsLeaf(False)
-            new_root.setKey(0, new_node.getKey(0))
-            new_root.setNumKeys(1)
-            new_root.setChildPointer(0, old_node_id)
-            new_root.setChildPointer(1, new_node_id)
+            separator = new_node.getKey(0)
 
-            new_root_id = self.getNewNodeID()
-            self.nodes[new_root_id] = new_root
-            self.root = new_root
+            if parent is None:
+                root_page = bytearray(4096)
+                new_root = Node(root_page)
+                new_root.setIsLeaf(False)
+                new_root.setKey(0, separator)
+                new_root.setNumKeys(1)
+                new_root.setChildPointer(0, old_node_id)
+                new_root.setChildPointer(1, new_node_id)
+
+                new_root_id = self.getNewNodeID()
+                self.nodes[new_root_id] = new_root
+                self.root = new_root
+            else:
+                # apenas o cenário com pai existente e com espaço
+                if parent.getNumKeys() >= (self.order - 1):
+                    raise NotImplementedError(
+                        "Split de nó interno ainda não implementado."
+                    )
+                
+                pos = 0
+                while ((pos < parent.getNumKeys()) and (separator > parent.getKey(pos))):
+                    pos += 1
+
+                n = parent.getNumKeys()
+
+                # abre espaço para a nova chave separadora
+                for i in range(n - 1, pos - 1, -1):
+                    parent.setKey(i + 1, parent.getKey(i))
+
+                # abre espaço para o novo ponteiro de filho
+                # O ponteiro em pos continua apontando para a folha antiga
+                for i in range(n, pos, -1):
+                    parent.setChildPointer(i + 1, parent.getChildPointer(i))
+
+                parent.setKey(pos, separator)
+                parent.setChildPointer(pos + 1, new_node_id)
+                parent.setNumKeys(n + 1)
+
             print(f"Chave {key} inserida com sucesso.")
