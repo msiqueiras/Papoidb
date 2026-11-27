@@ -97,3 +97,34 @@ class Parser:
         insert_infos = {"op": "INSERT", "table_name": table_identifier, "values": values}
 
         return insert_infos
+
+        def parse_select(self):
+            keyword_select = self._expected("KEYWORD", "SELECT")
+            
+            columns = []
+            current_token = self.tokens[self.position][0]
+
+            if current_token == "SYMBOL":
+                allnames = self._expected("SYMBOL", "*")
+                columns.append(allnames)
+            elif current_token == "IDENTIFIER":
+                table_identifier = self._expected("IDENTIFIER")
+                columns.append(table_identifier)
+
+                while self._accepted("SYMBOL", ","):
+                    table_identifier = self._expected("IDENTIFIER")
+                    columns.append(table_identifier)
+
+            keyword_from = self._expected("KEYWORD", "FROM")
+            table_identifier = self._expected("IDENTIFIER")
+
+            where = None
+            if self._accepted("KEYWORD", "WHERE"):
+                where_column = self._expected("IDENTIFIER")
+                self._expected("SYMBOL", "=")
+                where_value = self.parse_value()
+                where = {"column": where_column, "value": where_value}
+
+            select_info = {"op": "SELECT", "table_name": table_identifier, "columns": columns, "where": where}
+            return select_info
+        
