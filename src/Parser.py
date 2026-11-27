@@ -29,7 +29,7 @@ class Parser:
 
         return True
 
-    def parse_column(self):
+    def parse_column(self) -> dict:
 
         column_identifier = self._expected("IDENTIFIER")
         column_type = self._expected("KEYWORD")
@@ -46,3 +46,24 @@ class Parser:
             return column_infos
 
         raise SyntaxError(f"{column_type} NÃO É VÁLIDO PARA TABELAS. TENTE OS TIPOS INT OU CHAR.")
+
+    def parse_create(self) -> dict:
+        keyword_create = self._expected("KEYWORD", "CREATE")
+        keyword_table = self._expected("KEYWORD", "TABLE")
+        table_identifier = self._expected("IDENTIFIER")
+        parenteses = self._expected("SYMBOL", "(")
+
+        columns = []
+        column = self.parse_column()
+        columns.append(column)
+
+        while self._accepted("SYMBOL", ","):
+            column = self.parse_column()
+            columns.append(column)
+
+        parenteses = self._expected("SYMBOL", ")")
+
+        create_infos = {"op": "CREATE", "table_name": table_identifier, "columns": columns}
+
+        return create_infos
+    
