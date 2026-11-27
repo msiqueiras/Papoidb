@@ -1,4 +1,6 @@
 class Node:
+    NULL_POINTER = 0 # valor 0 fica reservado para indicar ausência de próxima folhas
+
     OFFSET_IS_LEAF = 0
     OFFSET_NUM_KEYS = 1
     OFFSET_NEXT_LEAF = 3
@@ -53,13 +55,16 @@ class BplusTree:
     def __init__(self, nodes: dict, order: int = 341):
         self.nodes = nodes
         self.order = order
+        self.next_node_id = 0
 
         page = bytearray(4096)
         self.root = Node(page)
         self.root.setIsLeaf(True)  
         self.root.setNumKeys(0)
+        self.root.setChildPointer(0, Node.NULL_POINTER)
 
         self.nodes[0] = self.root
+        self.next_node_id = 1
 
     def search(self, key: int) -> int | None:
         node = self.root
@@ -78,16 +83,30 @@ class BplusTree:
         
         return None
 
+    def getNewNodeID(self):
+        node_id = self.next_node_id
+        self.next_node_id += 1
+        return node_id
+
     def insert(self, key: int, ptr: int):
         node = self.root
+        node_id = 0
+        parent = None # define nó pai, inicialmente None, pois o nó incial é raiz
+        parent_id = None
 
         while not node.isLeaf():
             i = 0
             while (i < node.getNumKeys()) and (key >= node.getKey(i)):
                 i += 1
 
+            parent = node # salva o nó pai
+            parent_id = node_id
+
             child_id = node.getChildPointer(i)
+            node_id = child_id
             node = self.nodes[child_id]
+
+        old_node_id = node_id
 
         for k in range(node.getNumKeys()): #se há duplicatas
             if key == node.getKey(k):
@@ -108,4 +127,88 @@ class BplusTree:
             node.setNumKeys(node.getNumKeys() + 1)
             print(f"Chave {key} inserida com sucesso.")
         else:
-            raise OverflowError("A CHAVE NÃO FOI INSERIDA. FOLHA ALCANÇOU O LIMITE DE CHAVES.")
+            ### raise OverflowError("A CHAVE NÃO FOI INSERIDA. FOLHA ALCANÇOU O LIMITE DE CHAVES.")
+
+            # cria novo no
+            page = bytearray(4096)
+            new_node = Node(page)
+
+            # configura novo nó
+            new_node.setIsLeaf(True)
+            new_node.setNumKeys(0)
+            new_node.setChildPointer(0, Node.NULL_POINTER)
+            new_node_id = self.getNewNodeID()
+            self.nodes[new_node_id] = new_node
+
+            # faz a folha antiga apontar para a nova, preservando o ponteiro que ela tinha
+            old_node_ptr = node.getChildPointer(0)
+            node.setChildPointer(0, new_node_id)
+            new_node.setChildPointer(0, old_node_ptr)
+
+            # cria estrutura temporaria com o conteudo da folha original + a chave e ponteiro adicionados alem do limite da ordem 
+            overflow_node = []
+            for i in range(node.getNumKeys()):
+                overflow_node.append((node.getKey(i), node.getPointer(i)))
+            overflow_node.append((key, ptr))
+
+            # ordena a estrutura pelo valor da chave
+            overflow_node.sort(key=lambda item: item[0])
+
+            # divide a estrutura em duas partes
+            mid = len(overflow_node) // 2
+            left_entries = overflow_node[:mid]
+            right_entries = overflow_node[mid:]
+
+            # adiciona as chaves e ponteiros na folha antiga (esquerda)
+            for i, (k, p) in enumerate(left_entries):
+                node.setKey(i, k)
+                node.setPointer(i, p)
+            node.setNumKeys(len(left_entries))
+
+            # adiciona as chaves e ponteiros na folhas nova (direita)
+            for i, (k, p) in enumerate(right_entries):
+                new_node.setKey(i, k)
+                new_node.setPointer(i, p)
+            new_node.setNumKeys(len(right_entries))
+
+            separator = new_node.getKey(0)
+
+            if parent is None:
+                root_page = bytearray(4096)
+                new_root = Node(root_page)
+                new_root.setIsLeaf(False)
+                new_root.setKey(0, separator)
+                new_root.setNumKeys(1)
+                new_root.setChildPointer(0, old_node_id)
+                new_root.setChildPointer(1, new_node_id)
+
+                new_root_id = self.getNewNodeID()
+                self.nodes[new_root_id] = new_root
+                self.root = new_root
+            else:
+                # apenas o cenário com pai existente e com espaço
+                if parent.getNumKeys() >= (self.order - 1):
+                    raise NotImplementedError(
+                        "Split de nó interno ainda não implementado."
+                    )
+                
+                pos = 0
+                while ((pos < parent.getNumKeys()) and (separator > parent.getKey(pos))):
+                    pos += 1
+
+                n = parent.getNumKeys()
+
+                # abre espaço para a nova chave separadora
+                for i in range(n - 1, pos - 1, -1):
+                    parent.setKey(i + 1, parent.getKey(i))
+
+                # abre espaço para o novo ponteiro de filho
+                # O ponteiro em pos continua apontando para a folha antiga
+                for i in range(n, pos, -1):
+                    parent.setChildPointer(i + 1, parent.getChildPointer(i))
+
+                parent.setKey(pos, separator)
+                parent.setChildPointer(pos + 1, new_node_id)
+                parent.setNumKeys(n + 1)
+
+            print(f"Chave {key} inserida com sucesso.")
