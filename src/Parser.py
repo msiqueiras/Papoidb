@@ -66,4 +66,13 @@ class Parser:
         create_infos = {"op": "CREATE", "table_name": table_identifier, "columns": columns}
 
         return create_infos
-    
+
+    def parse_value(self) -> dict:
+        current_token = self.tokens[self.position][0]
+        if current_token == "NUMBER":
+            value = self._expected("NUMBER")
+        elif current_token == "STRING":
+            value = self._expected("STRING")
+        else:
+            raise SyntaxError(f"ERA ESPERADO UM NÚMERO OU UM TEXTO, MAS FOI RECEBIDO {current_token}")
+        return value
