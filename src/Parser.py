@@ -76,3 +76,24 @@ class Parser:
         else:
             raise SyntaxError(f"ERA ESPERADO UM NÚMERO OU UM TEXTO, MAS FOI RECEBIDO {current_token}")
         return value
+
+    def parse_insert(self):
+        keyword_insert = self._expected("KEYWORD", "INSERT")
+        keyword_into = self._expected("KEYWORD", "INTO")
+        table_identifier = self._expected("IDENTIFIER")
+        keyword_values = self._expected("KEYWORD", "VALUES")
+        parenteses = self._expected("SYMBOL", "(")
+
+        values = []
+        value = self.parse_value()
+        values.append(value)
+
+        while self._accepted("SYMBOL", ","):
+            value = self.parse_value()
+            values.append(value)
+
+        parenteses = self._expected("SYMBOL", ")")
+
+        insert_infos = {"op": "INSERT", "table_name": table_identifier, "values": values}
+
+        return insert_infos
