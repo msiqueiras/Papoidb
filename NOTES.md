@@ -92,3 +92,24 @@ Implementar a lógica de exceção para o caso de o cache estar cheio de página
 Arquiterualmente, a decisão que mais impactou na construção do módulo foi o encapsulamento da classe Node, já que em algumas implementações da internet, vimos que a estrutura do nó era criada dentro da classe da árvore diretamente, o que não fazia sentido para nós por estarmos manipulando bytes.
 Além disso, pelo tempo, no código atual, caso a folha encha, é lançado um `OverflowError`, assim não existindo o *split* de nós nesse momento. Para testes, a inserção de até `order-1` é seguro.
 
+---
+
+# Módulo 4
+
+## Conceitos importantes
+
+Para a construção de um executor de comandos SQL, precisamos construir um tonkenizador, um parser e um catálogo. O tokenizador é cego em questão de sintaxe e semântica, ele só enxerga um texto (o comando sql) e o separa em categorias de tokens em uma lista para cada comando. O parser é o validador de sintaxe e de ordenação de um comando, ele verifica se os comandos, palavras reservadas, símbolos e etc são os que estão dentro do esperado e se a ordem dos comandos está correta para uma execução do sql, já o catálogo é o validador de semântica do comando, avaliando se os parâmetros passados existem no disco na hora da consulta.
+
+### Classe Tokenizer
+
+- Possui listagens de comando relação a algumas palavras e símbolos reservados da linguagem sql
+- Os tipos de tokens para o tokenizador classificar são: KEYWORD, NUMBER, IDENTIFIER, STRING, SYMBOL, EOF (end of file)
+
+### Classe Parser
+
+- Possui métodos de identificação especial para os comandos de CREATE TABLE, INSERT INTO e SELECT FROM + orquestrador do método
+
+## Decisões importantes de implementação
+
+- No método de tokenização, não usamos o método nativo do python, o `split()`, pois ele não prevê nem o caso do fim do documento, nem o caso de ter caracteres alfanuméricos juntos a símbolos, já que ele pega o conjunto de caractere inteiro, sem distinções das classes. Foi necessário percorrer o comando sql por meio de estruturas de repetições e os índices das palavras
+- Para a classe Parser, foi decidido que fizessemos um método parse para cada comando em especial para não ferir o conceito da engenharia de software de responsabilidade única. Decidiu-se que o símbolo especial para finalizar um comando, o ponto e vírgula `;` não fosse obrigatório
