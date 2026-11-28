@@ -68,29 +68,47 @@ Implementar a lógica de exceção para o caso de o cache estar cheio de página
 
 ## Conceitos importantes
 
-- A árvore B+ é uma variação da árvore B, onde todos os nós folhas estão no mesmo nível. Além disso, há ponteiros na profundidade das folhas que permitem que esse nível seja lido de forma sequencial ordenamente crescente
-- As chaves nós folhas apontam diretamente para o registro no disco de seus valores
-- Os nós internos são guias para navegação para inserções, buscas e remoções
-- Uma árvore B+ possui ordem `m`, que é a quantidade máxima de filhos que um nó interno não-raiz pode ter
-- Cada nó interno possui no máximo `m-1` chaves
-- Ao gerar overflow na inserção de chaves, pegamos a chave ao meio para criarmos mais um nó ou inseri-la em outro nó, seja ele no mesmo nível, seja ele no nível a cima
+- A árvore B+ é uma variação da árvore B, onde todos os nós folhas estão no mesmo nível. Além disso, há ponteiros na profundidade das folhas que permitem que esse nível seja lido de forma sequencial ordenamente crescente.
+- As chaves dos nós folhas apontam diretamente para o registro no disco por meio de um ponteiro.
+- Os nós internos são como guias para navegação durante inserções e buscas.
+- Uma árvore B+ possui ordem `m`, que é a quantidade máxima de filhos que um nó interno não-raiz pode ter.
+- Cada nó interno possui no máximo, `m-1` chaves.
+- Ao gerar overflow na inserção de chaves, pegamos a chave ao meio para criarmos mais um nó ou inseri-la em outro nó, seja ele no mesmo nível, seja ele no nível acima. Isso se chama *split*.
 
 ### Classe Node
 
 É a classe do nó da árvore B+. É nela em que sabemos o cabeçalho geral daquele nó, se ele é nó folha, quantas chaves aquele nó possui, o ponteiro para a próxima chave e as chaves em si. Os offsets definidos no ínicio são parte do cabeçalho da página/nó definindo onde cada informação pode ser encontrada na página.
 
 - Observação 1: O cálculo da chave+ponteiro é feita com base no pulo do cabeçalho:  
-  - Chave: ponto de partida (byte 7) + (índice em que está a chave)*8. Esse 8 são os bytes da chave+ponteiro (4 bytes cada)
-  - Ponteiro: mesma fórmula com um +4 significa apenas que o ponteiro começa 4 bytes depois de onde está a sua chave
+  - Chave: ponto de partida (byte 7) + (índice em que está a chave)*8. Esse 8 são os bytes da chave+ponteiro (4 bytes cada).
+  - Ponteiro: mesma fórmula com um +4 significa apenas que o ponteiro começa 4 bytes depois de onde está a sua chave.
+- Observação 2: Também foram implementados métodos para acessar e modificar os ponteiros dos filhos dos nós internos, permitindo a navegação pela árvore.
 
 ### Classe BplusTree
 
-É a classe de gerenciamento de nós. É onde podemos buscar e inserir novas chaves. Importante mencionar que a **REMOÇÃO** de nós **NÃO** foi implementada nesse escopo por falta de tempo.
+É a classe responsável pelo gerenciamento da árvore. Ela mantém os nós armazenados em um dicionário (`nodes`), controla a raiz e disponibiliza os métodos de busca (`search`) e inserção (`insert`).
+
+Para identificar os nós, foi adicionado o atributo `next_node_id`, que gera identificadores únicos por meio do método `getNewNodeID()`. Assim, cada novo nó criado durante um split pode ser armazenado e posteriormente localizado no dicionário.
 
 ## Decisão mais importante
 
 Arquiterualmente, a decisão que mais impactou na construção do módulo foi o encapsulamento da classe Node, já que em algumas implementações da internet, vimos que a estrutura do nó era criada dentro da classe da árvore diretamente, o que não fazia sentido para nós por estarmos manipulando bytes.
-Além disso, pelo tempo, no código atual, caso a folha encha, é lançado um `OverflowError`, assim não existindo o *split* de nós nesse momento. Para testes, a inserção de até `order-1` é seguro.
+
+Também foi implementado o *split* de nós folhas. Quando uma folha atinge seu limite de chaves, é criado um novo nó folha e as entradas são reunidas em uma estrutura temporária, ordenadas e divididas em duas partes. A folha original mantém a primeira metade, enquanto a nova recebe a segunda. Além disso, os ponteiros entre as folhas são atualizados para preservar a sequência.
+
+Para integrar os dois nós à árvore, foi necessário armazenar também o nó pai durante a navegação da inserção. A primeira chave da nova folha é utilizada como separadora e inserida no pai, acompanhada do ponteiro para o novo filho.
+
+Quando a folha dividida é a própria raiz, é criada uma nova raiz interna, que passa a apontar para as duas folhas. Isso permite que a árvore deixe de ser formada por apenas um nível.
+
+**Limitações da implementação atual:**
+
+- A propagação do split para níveis superiores não foi implementada.
+- O split de nós internos não foi implementado. Caso o nó pai esteja cheio, é lançada uma exceção `NotImplementedError`.
+- Não foi implementado o controle de altura da árvore.
+- A remoção de chaves não foi implementada.
+- Casos mais complexos de inserção e reorganização da árvore ainda não são tratados.
+
+Portanto, a implementação atual permite buscas, inserções em folhas com espaço disponível e split de folhas, incluindo a criação de uma nova raiz e a atualização de um pai que ainda possua espaço.
 
 ---
 
